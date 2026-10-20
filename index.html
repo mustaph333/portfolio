@@ -4,9 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
-    <meta name="description" content="Isaac Rais — self-taught Python & Django developer from Tangier, Morocco. Building AI-powered projects in public." />
+    <meta name="description" content="Mustapha Rais — Python & Django backend developer from Tangier, Morocco. I build AI chat bots, automation tools and web backends. Open to freelance & developer roles in Europe." />
     <link rel="icon" href="data:," />
-    <title>Isaac Rais — Python &amp; Django Developer</title>
+    <title>Mustapha Rais — Python &amp; Django Developer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -128,6 +128,7 @@
       }
       .hero-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.8s ease-in-out infinite; }
       @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,.5); } 50% { box-shadow: 0 0 0 7px rgba(52,211,153,0); } }
+      .hero h1 { font-size: clamp(44px, 9vw, 96px) !important; }
       .hero h1 {
         font-family: var(--font-display); font-weight: 800;
         font-size: clamp(52px, 10vw, 108px); line-height: 0.98;
@@ -445,17 +446,50 @@
         .reveal { opacity: 1 !important; transform: none !important; }
         .nav, #toTop, .scroll-hint, #particles { display: none !important; }
       }
+    
+      /* ---------- Professional extras ---------- */
+      #progressBar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--amber)); width: 0%; z-index: 100; transition: width .08s linear; }
+      .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; animation: rise .9s .7s cubic-bezier(.2,.7,.3,1) both; }
+      .hero-meta > span { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); background: rgba(255,255,255,.04); border: 1px solid var(--line); padding: 8px 13px; border-radius: 999px; backdrop-filter: blur(6px); }
+      .hero-meta .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,.5); animation: pulse 1.8s infinite; }
+      .now-widget { margin-top: 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 760px; animation: rise .9s .8s both; }
+      .now-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+      .now-card small { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 6px; }
+      .now-card strong { font-size: 14.5px; line-height: 1.3; display: block; }
+      .now-card p { margin: 4px 0 0; font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+      .services-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+      .service { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 26px; transition: .25s; }
+      .service:hover { border-color: rgba(52,211,153,.5); transform: translateY(-3px); }
+      .service h3 { margin: 12px 0 8px; font-family: var(--font-display); font-size: 20px; }
+      .service p { margin: 0; color: var(--ink-soft); font-size: 15.5px; line-height: 1.6; }
+      .service ul { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 7px; }
+      .service ul li { font-family: var(--font-mono); font-size: 12px; border: 1px solid var(--line); background: #0b100f; padding: 5px 10px; border-radius: 999px; color: var(--ink-dim); }
+      .process { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; }
+      .step { border: 1px solid var(--line); background: var(--bg-2); border-radius: 16px; padding: 20px; }
+      .step b { font-family: var(--font-mono); color: var(--accent); font-size: 13px; }
+      .step h4 { margin: 8px 0 6px; font-family: var(--font-display); }
+      .step p { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+      .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; text-align: left; }
+      .info-card { background: #0b100f; border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+      .info-card small { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); }
+      .info-card strong { display: block; margin-top: 6px; font-size: 15px; }
+      .info-card span { font-size: 13.5px; color: var(--ink-soft); }
+      @media (max-width: 900px){ .services-grid, .process, .info-grid, .now-widget { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 560px){ .services-grid, .process, .info-grid, .now-widget { grid-template-columns: 1fr; } }
+
     </style>
   </head>
   <body>
+    <div id="progressBar" aria-hidden="true"></div>
     <noscript><style>.reveal { opacity: 1 !important; transform: none !important; } .skill-fill { width: auto !important; }</style></noscript>
     <!-- ================= NAV ================= -->
     <header class="nav" id="nav">
       <div class="nav-inner">
-        <a class="brand" href="#top"><span class="prompt">~/</span>isaac.rais<span class="cursor-blink" aria-hidden="true"></span></a>
+        <a class="brand" href="#top"><span class="prompt">~/</span>mustapha.rais<span class="cursor-blink" aria-hidden="true"></span></a>
         <nav class="nav-links" aria-label="Sections">
           <a href="#about" data-spy="about">About</a>
           <a href="#skills" data-spy="skills">Skills</a>
+          <a href="#services" data-spy="services">Services</a>
           <a href="#projects" data-spy="projects">Projects</a>
           <a href="#journey" data-spy="journey">Journey</a>
           <a href="#contact" data-spy="contact">Contact</a>
@@ -471,6 +505,7 @@
       <nav class="mobile-menu" id="mobileMenu" aria-label="Sections">
         <a href="#about">About</a>
         <a href="#skills">Skills</a>
+        <a href="#services">Services</a>
         <a href="#projects">Projects</a>
         <a href="#journey">Journey</a>
         <a href="#contact">Contact</a>
@@ -483,16 +518,17 @@
       <canvas id="particles" aria-hidden="true"></canvas>
       <div class="hero-grid-bg" aria-hidden="true"></div>
       <div class="hero-inner">
-        <span class="hero-pill"><span class="dot"></span> Building in public · Tangier, Morocco</span>
+        <span class="hero-pill"><span class="dot"></span> Available for work · Tangier, Morocco · Open to Europe & Remote</span>
         <h1>
-          <span class="word">Isaac</span>
+          <span class="word">Mustapha</span>
           <span class="word d2 last">Rais</span>
         </h1>
         <p class="typewriter-line">&gt; I am a <span class="typed" id="typed"></span><span class="caret" aria-hidden="true"></span></p>
         <p class="hero-sub">
-          Self-taught developer on the <strong>Python / Django backend</strong> track, building
-          <strong>AI-powered projects</strong> — and working toward a developer role in Europe.
-          Everything I ship is documented, every single day.
+          I'm a self-taught <strong>Python &amp; Django backend developer</strong> from Tangier.
+          I build <strong>AI chat bots, automation tools and practical web backends</strong> that solve real problems —
+          shipped in public, documented daily, and always improving. Currently focused on freelance projects
+          and preparing for a developer role in Europe.
         </p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="#projects">See my projects
@@ -502,6 +538,17 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.627-5.373-12-12-12"/></svg>
             github.com/mustaph333
           </a>
+        </div>
+        <div class="hero-meta" aria-label="Quick facts">
+          <span><span class="live-dot"></span> Open to work — Freelance &amp; Full-time</span>
+          <span>Tangier, Morocco — <span id="tangierTime">--:--</span> local time</span>
+          <span>Replies via GitHub — usually within 24h</span>
+          <span>German — B1 certificate track</span>
+        </div>
+        <div class="now-widget">
+          <div class="now-card"><small>● Now Building</small><strong>RTX 3080 Price Tracker</strong><p>Python watcher for Avito — alerts when price drops.</p></div>
+          <div class="now-card"><small>● Live Project</small><strong>@raisxs_bot on Telegram</strong><p>AI chat bot with real users, running 24/7.</p></div>
+          <div class="now-card"><small>● Daily Habit</small><strong>Code + Learning Log</strong><p>New entry every day on GitHub — no skipped days.</p></div>
         </div>
       </div>
       <a class="scroll-hint" href="#stats" aria-label="Scroll down">
@@ -562,32 +609,32 @@
         <div class="about-grid">
           <div class="about-copy reveal from-left">
             <p>
-              I'm <strong>Isaac Rais</strong>, a 27-year-old self-taught developer from
+              I'm <strong>Mustapha Rais</strong>, a 27-year-old self-taught developer from
               <strong>Tangier, Morocco</strong>. I picked the backend track —
               <span class="hl">Python and Django</span> — and I'm aiming it at
               <span class="hl">AI-powered projects</span>: bots, automation, and tools that do real work.
             </p>
             <p>
-              My biggest project so far is a live Telegram bot with AI chat replies that people
-              actually talk to. Alongside the code, I keep a <strong>public learning log</strong> —
-              updated daily — because building in public keeps me honest.
+              My biggest project so far is a live Telegram bot (@raisxs_bot) with AI chat replies that people actually talk to every day. Alongside the code, I keep a <strong>public learning log</strong> — updated daily — because building in public keeps me honest and shows exactly how I work: plan, build, test, document, ship.
             </p>
             <p>
               The long-term goal is clear: <strong>a developer role in Europe</strong>. That's why,
               next to the code, I'm also learning German and working toward a B1 certificate.
             </p>
             <ul class="fact-list">
-              <li><b>Based in</b> Tangier, Morocco</li>
+              <li><b>Based in</b> Tangier, Morocco — open to remote &amp; relocation to Europe</li>
+              <li><b>Availability</b> Open to freelance, internships &amp; junior developer roles</li>
+              <li><b>Languages</b> Arabic · English · German (learning, B1 goal) · French (basic)</li>
               <li><b>Track</b> Python / Django backend → AI projects</li>
               <li><b>Learning</b> APIs · automation · German (B1 goal)</li>
               <li><b>Goal</b> Developer role in Europe</li>
             </ul>
           </div>
           <div class="terminal reveal from-right" aria-label="Terminal-style profile summary">
-            <div class="terminal-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>isaac@ tangier: ~/portfolio</span></div>
+            <div class="terminal-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>mustapha@ tangier: ~/portfolio</span></div>
             <div class="terminal-body">
               <div class="cmd">whoami</div>
-              <div class="out">isaac_rais — developer, 27, tangier, morocco</div>
+              <div class="out">mustapha_rais — developer, 27, tangier, morocco</div>
               <div class="cmd">cat stack.json</div>
               <div class="out">{
   <span class="key">"core"</span>: [<span class="str">"Python"</span>, <span class="str">"Django"</span>, <span class="str">"HTML"</span>, <span class="str">"CSS"</span>],
@@ -610,7 +657,7 @@
         <div class="sec-head reveal">
           <span class="sec-tag">02 · Skills</span>
           <h2>The stack I build with</h2>
-          <p>Four core skills, proven in shipped projects — plus three more in active training.</p>
+          <p>Core stack proven in shipped, live projects — not just tutorials. Every skill below is used in code you can read on GitHub right now.</p>
         </div>
         <div class="skills-grid">
           <div class="skill reveal">
@@ -665,11 +712,59 @@
       </div>
     </section>
 
+
+    <!-- ================= SERVICES ================= -->
+    <section id="services" style="background: var(--bg);">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <span class="sec-tag">03 · What I Do</span>
+          <h2>What I can build for you</h2>
+          <p>Focused, practical development — small, well-built tools that work reliably and are easy to maintain.</p>
+        </div>
+        <div class="services-grid">
+          <article class="service reveal">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);font-family:var(--font-mono);font-weight:700;color:var(--accent)">01</div>
+            <h3>AI Chat Bots &amp; Assistants</h3>
+            <p>Telegram and chat bots with AI replies, custom commands, language modes and 24/7 uptime. Like @raisxs_bot — built, deployed and maintained live.</p>
+            <ul><li>Python</li><li>Telegram API</li><li>AI APIs</li><li>Automation</li></ul>
+          </article>
+          <article class="service reveal d1">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);font-family:var(--font-mono);font-weight:700;color:var(--accent)">02</div>
+            <h3>Backend &amp; Web Apps</h3>
+            <p>Clean Django backends — data models, views, forms, admin, and REST-style endpoints. Built to be readable, secure and ready to grow.</p>
+            <ul><li>Python</li><li>Django</li><li>HTML / CSS</li><li>Git</li></ul>
+          </article>
+          <article class="service reveal">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);font-family:var(--font-mono);font-weight:700;color:var(--accent)">03</div>
+            <h3>Automation &amp; Price Trackers</h3>
+            <p>Watchers that monitor listings, prices or data and alert you instantly — no more manual refreshing. Built for Avito and custom sources.</p>
+            <ul><li>Web Scraping</li><li>Alerts</li><li>Scheduling</li><li>Data Tools</li></ul>
+          </article>
+          <article class="service reveal d1">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);font-family:var(--font-mono);font-weight:700;color:var(--accent)">04</div>
+            <h3>Portfolio &amp; Landing Pages</h3>
+            <p>Fast, animated, mobile-first single-page sites — hand-coded, no templates. This page is the example: particles, typewriter, scroll animations.</p>
+            <ul><li>HTML</li><li>CSS</li><li>JavaScript</li><li>Responsive</li></ul>
+          </article>
+        </div>
+
+        <div class="reveal" style="margin-top:54px">
+          <h3 style="font-family: var(--font-display); font-size:22px; margin:0">How I work — simple &amp; professional</h3>
+          <div class="process">
+            <div class="step"><b>01 — PLAN</b><h4>Understand first</h4><p>We agree on what success looks like, scope and timeline before any code.</p></div>
+            <div class="step"><b>02 — BUILD</b><h4>Build in small steps</h4><p>Working version early, then iterate. You see progress, not silence.</p></div>
+            <div class="step"><b>03 — TEST</b><h4>Test on real use</h4><p>Tested on mobile &amp; desktop, with real data and real users where possible.</p></div>
+            <div class="step"><b>04 — SHIP</b><h4>Ship &amp; document</h4><p>Deployed, documented on GitHub, with a clear handover and next steps.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= PROJECTS ================= -->
     <section id="projects">
       <div class="wrap">
         <div class="sec-head reveal">
-          <span class="sec-tag">03 · Projects</span>
+          <span class="sec-tag">04 · Projects</span>
           <h2>Things I've built &amp; shipped</h2>
           <p>Real projects, honest statuses. If it says in progress, it means in progress.</p>
         </div>
@@ -754,7 +849,7 @@
     <section id="journey">
       <div class="wrap">
         <div class="sec-head reveal" style="margin-inline:auto; text-align:center;">
-          <span class="sec-tag" style="justify-content:center;">04 · Journey</span>
+          <span class="sec-tag" style="justify-content:center;">05 · Journey</span>
           <h2>The road so far — and where it leads</h2>
         </div>
         <div class="timeline" id="timeline">
@@ -807,11 +902,16 @@
     <section id="contact">
       <div class="wrap">
         <div class="contact-card reveal">
-          <h2>Let's build something.</h2>
+          <span class="sec-tag" style="justify-content:center; display:inline-flex">06 · Contact</span>
+          <h2 style="margin-top:14px">Let's build something useful.</h2>
           <p>
-            Every project, every commit, and every day of the learning log lives on my GitHub.
-            That's the best place to see what I can do — and to reach me.
+            Have a bot, a backend, a tracker or a website in mind? Every project, commit and day of my learning log lives on GitHub — that's the fastest way to see how I work and to reach me. I reply personally.
           </p>
+          <div class="info-grid">
+            <div class="info-card"><small>Location</small><strong>Tangier, Morocco</strong><span>Remote worldwide · Europe focus</span></div>
+            <div class="info-card"><small>Availability</small><strong style="color: var(--accent)">● Open to work</strong><span>Freelance · Junior roles · Internships</span></div>
+            <div class="info-card"><small>Best contact</small><strong>GitHub — @mustaph333</strong><span>See code, log &amp; projects there</span></div>
+          </div>
           <a class="gh-big" href="https://github.com/mustaph333" target="_blank" rel="noopener">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.627-5.373-12-12-12"/></svg>
             github.com/mustaph333
@@ -823,8 +923,8 @@
 
     <footer>
       <div class="footer-inner">
-        <span>© 2026 <strong>Isaac Rais</strong> — built by hand, updated like everything else: daily.</span>
-        <span class="mono">HTML · CSS · JS — no template</span>
+        <span>© 2026 <strong>Mustapha Rais</strong> — built by hand, updated like everything else: daily.</span>
+        <span class="mono">Python · Django · HTML · CSS · JS — Hand-built, no template</span>
         <a href="https://github.com/mustaph333" target="_blank" rel="noopener">GitHub ↗</a>
       </div>
     </footer>
@@ -933,6 +1033,9 @@
             });
           }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
           revealEls.forEach(function (el) { ro.observe(el); });
+          setTimeout(function () {
+            revealEls.forEach(function (el) { el.classList.add("in"); });
+          }, 2800);
         } else {
           revealEls.forEach(function (el) { el.classList.add("in"); });
         }
@@ -1018,7 +1121,7 @@
         var nav = document.getElementById("nav");
         var toTop = document.getElementById("toTop");
         var spyLinks = document.querySelectorAll("[data-spy]");
-        var spySections = ["about", "skills", "projects", "journey", "contact"].map(function (id) {
+        var spySections = ["about", "skills", "services", "projects", "journey", "contact"].map(function (id) {
           return document.getElementById(id);
         });
         function onScroll() {
@@ -1038,6 +1141,26 @@
         toTop.addEventListener("click", function () {
           window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
         });
+
+
+        /* ---------- Scroll progress + Tangier live clock ---------- */
+        var progressBar = document.getElementById("progressBar");
+        function updateProgress(){
+          if(!progressBar) return;
+          var h = document.documentElement;
+          var max = h.scrollHeight - h.clientHeight;
+          progressBar.style.width = (max>0 ? (window.scrollY/max)*100 : 0) + "%";
+        }
+        window.addEventListener("scroll", updateProgress, { passive: true });
+        updateProgress();
+        var timeEl = document.getElementById("tangierTime");
+        function tickClock(){
+          if(!timeEl) return;
+          try {
+            timeEl.textContent = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Casablanca", hour: "2-digit", minute: "2-digit" }).format(new Date());
+          } catch(e){ timeEl.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+        }
+        tickClock(); setInterval(tickClock, 20000);
 
         /* ---------- Mobile menu ---------- */
         var toggle = document.getElementById("navToggle");

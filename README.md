@@ -1,4 +1,4 @@
-# Isaac Rais — Developer Portfolio
+# Mustapha Rais — Developer Portfolio
 
 My personal portfolio site: one big animated page built with HTML, CSS and JavaScript.
 
