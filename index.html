@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
-    <meta name="description" content="Mustapha Rais — Python & Django backend developer from Tangier, Morocco. I build AI chat bots, automation tools and web backends. Open to freelance & developer roles in Europe." />
+    <meta name="description" content="Mustapha Rais — Python & Django backend developer from Tangier, Morocco. Creator of ClipForge & PyREA. I build AI chat bots, open-source tools and web backends. Open to freelance & developer roles in Europe." />
     <meta name="theme-color" content="#0a0e0d" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Mustapha Rais — Python &amp; Django Developer" />
@@ -343,6 +343,14 @@
       .project-link svg { transition: transform .2s; }
       .project-link:hover svg { transform: translate(3px, -3px); }
       .project-link.muted { color: var(--ink-dim); pointer-events: none; }
+      .project.featured { grid-column: 1 / -1; border-color: rgba(52,211,153,.45); background: linear-gradient(135deg, rgba(52,211,153,.09), var(--surface) 42%); }
+      .project.featured h3 { font-size: 30px; }
+      .project.featured p { max-width: 720px; font-size: 17px; }
+      .forge-steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 22px; font-family: var(--font-mono); font-size: 12.5px; }
+      .forge-steps span { background: #0b100f; border: 1px solid var(--line); padding: 7px 11px; border-radius: 999px; color: var(--ink-soft); }
+      .forge-steps i { color: var(--accent); font-style: normal; }
+      .badge.new { color: #06231a; background: var(--accent); border: 1px solid var(--accent); }
+      .badge.new::before { background: #06231a; animation: none; }
 
       /* ---------- Journey ---------- */
       #journey { background: var(--bg-2); border-block: 1px solid var(--line); overflow: hidden; }
@@ -565,9 +573,9 @@
         <p class="typewriter-line">&gt; I am a <span class="typed" id="typed"></span><span class="caret" aria-hidden="true"></span></p>
         <p class="hero-sub">
           I'm a self-taught <strong>Python &amp; Django backend developer</strong> from Tangier.
-          I build <strong>AI chat bots, automation tools and practical web backends</strong> that solve real problems —
-          shipped in public, documented daily, and always improving. Currently focused on freelance projects
-          and preparing for a developer role in Europe.
+          I build <strong>AI chat bots, open-source tools like ClipForge &amp; PyREA, and practical web backends</strong> —
+          shipped in public on GitHub, documented daily, and made for other people to actually use. Currently focused on
+          freelance projects and preparing for a developer role in Europe.
         </p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="#projects">See my projects
@@ -585,7 +593,7 @@
           <span>German — B1 certificate track</span>
         </div>
         <div class="now-widget">
-          <div class="now-card"><small>● Now Building</small><strong>Price Tracker</strong><p>Python watcher for websites — alerts when prices drop.</p></div>
+          <div class="now-card"><small>● Just Shipped</small><strong>ClipForge — AI Video Studio</strong><p>Topic in, finished vertical video out. Free &amp; local, on GitHub now.</p></div>
           <div class="now-card"><small>● Live Project</small><strong>@raisxs_bot on Telegram</strong><p>AI chat bot with real users, running 24/7.</p></div>
           <div class="now-card"><small>● Daily Habit</small><strong>Code + Learning Log</strong><p>New entry every day on GitHub — no skipped days.</p></div>
         </div>
@@ -616,7 +624,7 @@
     <div class="stats-band" id="stats">
       <div class="stats-grid">
         <div class="stat reveal">
-          <div class="num"><span class="count" data-count="2">0</span></div>
+          <div class="num"><span class="count" data-count="4">0</span></div>
           <div class="label">Live projects</div>
           <div class="sub">shipped &amp; running</div>
         </div>
@@ -682,8 +690,10 @@
 }</div>
               <div class="cmd">./goal --print</div>
               <div class="out"><span class="comment"># ship real projects → work as a dev in Europe</span></div>
+              <div class="cmd">ls ~/github --public</div>
+              <div class="out">clipforge · pyrea · ai-bot · portfolio</div>
               <div class="cmd">status</div>
-              <div class="out">bot: <span class="str">LIVE</span> · log: <span class="str">daily</span> · next: <span class="key">your project?</span></div>
+              <div class="out">bot: <span class="str">LIVE</span> · clipforge: <span class="str">NEW</span> · log: <span class="str">daily</span> · next: <span class="key">your project?</span></div>
             </div>
           </div>
         </div>
@@ -805,9 +815,33 @@
         <div class="sec-head reveal">
           <span class="sec-tag">04 · Projects</span>
           <h2>Things I've built &amp; shipped</h2>
-          <p>Real projects, honest statuses. If it says in progress, it means in progress.</p>
+          <p>Real projects, honest statuses — all public on GitHub. Start with ClipForge, my newest open-source tool.</p>
         </div>
         <div class="projects-grid">
+          <article class="project featured reveal tilt">
+            <div class="project-top">
+              <span class="project-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 9h20M7 4v5M17 4v5M10 12.5v4l4-2z" fill="currentColor" stroke="none"/></svg>
+              </span>
+              <span class="badge new">New · Open Source</span>
+            </div>
+            <h3>ClipForge — Free AI Video Studio</h3>
+            <p>
+              Other tools charge per video. ClipForge lives on <strong>your own computer, for free</strong>.
+              Give it a topic and it writes the script, speaks it with a free AI voice, builds the picture track,
+              burns in subtitles and exports <strong>one finished vertical video</strong> — ready for Reels, Shorts &amp; TikTok.
+              Pure Python + FFmpeg, runs on any PC.
+            </p>
+            <div class="forge-steps" aria-label="How ClipForge works">
+              <span>1 · Topic</span><i>→</i><span>2 · Script</span><i>→</i><span>3 · AI Voice</span><i>→</i><span>4 · Slides + Subtitles</span><i>→</i><span>5 · Finished MP4</span>
+            </div>
+            <div class="tags"><span>Python</span><span>FFmpeg</span><span>AI Voice</span><span>Subtitles</span><span>Vertical Video</span><span>Free &amp; Local</span></div>
+            <a class="project-link" href="https://github.com/mustaph333/clipforge" target="_blank" rel="noopener">
+              View on GitHub — try it yourself
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+            </a>
+          </article>
+
           <article class="project reveal tilt">
             <div class="project-top">
               <span class="project-icon">
@@ -933,6 +967,14 @@
 
           <div class="tl-item reveal">
             <span class="tl-dot"></span>
+            <span class="tl-when">2026 · Just shipped</span>
+            <h3>ClipForge went public</h3>
+            <p>A free, local AI video studio in pure Python — topic in, finished vertical video out. Built to be starred, forked and actually used.</p>
+            <span class="tl-state done">Live on GitHub</span>
+          </div>
+
+          <div class="tl-item reveal">
+            <span class="tl-dot"></span>
             <span class="tl-when">Now · Building</span>
             <h3>Price tracker</h3>
             <p>A Python watcher scanning websites for price drops under target. Automation skills, applied to a real hunt.</p>
@@ -999,7 +1041,7 @@
         var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         /* ---------- Typewriter ---------- */
-        var roles = ["Python Developer", "Django Builder", "AI Bot Creator", "Future Europe-Based Dev"];
+        var roles = ["Python Developer", "Django Builder", "AI Bot Creator", "Open-Source Tool Builder", "Future Europe-Based Dev"];
         var typedEl = document.getElementById("typed");
         if (typedEl) {
           if (reduceMotion) {
