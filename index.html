@@ -119,6 +119,12 @@
       body.has-cursor #cursorRing { display: flex !important; }
       body.has-cursor #cursorDot, body.has-cursor #cursorRing { display: block; }
 
+      /* ---------- Lenis smooth scroll (library-recommended base styles) ---------- */
+      html.lenis, html.lenis body { height: auto; }
+      .lenis.lenis-smooth { scroll-behavior: auto !important; }
+      .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+      .lenis.lenis-stopped { overflow: hidden; }
+
       /* ---------- Scroll progress ---------- */
       #progressBar { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); box-shadow: 0 0 12px rgba(74, 222, 128, .65); width: 0%; z-index: 120; }
 
@@ -380,13 +386,10 @@
       @supports not (-webkit-text-stroke: 1px black) { .sec-head h2 .ow, .contact-inner h2 .ow { color: var(--accent); } }
       .sec-head p { color: var(--ink-soft); margin: 0; font-size: 17px; position: relative; z-index: 1; }
 
-      /* Reveal */
-      .js .reveal { opacity: 0; transform: translateY(56px); transition: opacity 1.3s var(--ease), transform 1.3s var(--ease); }
-      .js .reveal.from-left { transform: translateX(-64px); }
-      .js .reveal.from-right { transform: translateX(64px); }
-      .js .reveal.in { opacity: 1; transform: none; }
-      .reveal.d1 { transition-delay: .16s; } .reveal.d2 { transition-delay: .32s; }
-      .reveal.d3 { transition-delay: .48s; } .reveal.d4 { transition-delay: .64s; }
+      /* Reveal — driven by GSAP ScrollTrigger (see script). Elements stay
+         visible by default; GSAP sets the from-state only when it loads,
+         so content can never be stuck hidden if a CDN script fails. */
+      .gsap-init .reveal { will-change: transform, opacity; }
 
       /* ---------- Stats ---------- */
       .stats-band { background: var(--bg-2); border-block: 1px solid var(--line-soft); padding: 84px 28px; overflow-x: clip; }
@@ -689,7 +692,6 @@
       @media (prefers-reduced-motion: reduce) {
         html { scroll-behavior: auto; }
         *, *::before, *::after { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; transition-duration: 0.001s !important; }
-        .js .reveal { opacity: 1; transform: none; }
         .marquee-track, .kinetic-track { animation: none; }
         .grain { animation: none; }
         #preloader { display: none !important; }
@@ -697,7 +699,7 @@
       }
       @media print {
         .reveal { opacity: 1 !important; transform: none !important; }
-        .nav, #toTop, .scroll-hint, #webgl, #particles, #dots, .grain, #cursorDot, #cursorRing { display: none !important; }
+        .nav, #toTop, .scroll-hint, #webgl, #particles, #dots, .grain, #cursorDot, #cursorRing, #preloader { display: none !important; }
       }
     </style>
   </head>
@@ -1255,6 +1257,9 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></svg>
     </button>
 
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
     <script>
       (function () {
         "use strict";
@@ -1282,6 +1287,55 @@
             setTimeout(function () { preloader.style.display = "none"; }, 2400);
           }
         }
+
+        /* ---------- Lenis smooth scroll + GSAP on one shared clock ----------
+           Guarded: if any CDN script failed to load, or the user prefers
+           reduced motion, lenis stays null and the page scrolls natively. */
+        var lenis = null;
+        var gsapReady = false;
+        if (!reduceMotion &&
+          typeof window.gsap !== "undefined" &&
+          typeof window.ScrollTrigger !== "undefined") {
+          try {
+            gsap.registerPlugin(ScrollTrigger);
+            gsapReady = true;
+            if (typeof window.Lenis !== "undefined") {
+              lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1, smoothWheel: true });
+              lenis.on("scroll", ScrollTrigger.update);
+              gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+              gsap.ticker.lagSmoothing(0);
+              /* Hold still while the preloader covers the page, then release. */
+              if (document.body.classList.contains("pre-lock")) {
+                lenis.stop();
+                var preWatch = setInterval(function () {
+                  if (!document.body.classList.contains("pre-lock")) {
+                    lenis.start();
+                    clearInterval(preWatch);
+                  }
+                }, 100);
+                setTimeout(function () { clearInterval(preWatch); }, 4000);
+              }
+            }
+          } catch (e) {
+            lenis = null;
+          }
+        }
+
+        /* In-page anchors ride Lenis when it is running; native otherwise. */
+        document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+          a.addEventListener("click", function (ev) {
+            var id = a.getAttribute("href");
+            if (!id || id.length < 2) return;
+            var target = null;
+            try { target = document.querySelector(id); } catch (e) { target = null; }
+            if (!target) return;
+            if (lenis) {
+              ev.preventDefault();
+              lenis.scrollTo(target, { offset: -84, duration: 1.35 });
+              try { history.replaceState(null, "", id); } catch (e) {}
+            }
+          });
+        });
 
         /* ---------- Typewriter ---------- */
         var roles = ["Python Developer", "Django Builder", "AI Bot Creator", "Open-Source Tool Builder", "Future Europe-Based Dev"];
@@ -1628,35 +1682,34 @@
           });
         }
 
-        /* ---------- Scroll reveal ---------- */
+        /* ---------- Section reveals — GSAP ScrollTrigger ----------
+           From-states are applied by GSAP itself, only after the library
+           has loaded, so no element can ever be left permanently hidden.
+           The delay classes (d1–d4) become GSAP delays for the stagger,
+           and .in is still added on entry (the journey dots key off it). */
         var revealEls = document.querySelectorAll(".reveal");
-        if ("IntersectionObserver" in window && !reduceMotion) {
-          var ro = new IntersectionObserver(function (entries) {
-            entries.forEach(function (en) {
-              if (en.isIntersecting) { en.target.classList.add("in"); ro.unobserve(en.target); }
+        if (gsapReady) {
+          document.documentElement.classList.add("gsap-init");
+          revealEls.forEach(function (el) {
+            var fromVars = { opacity: 0, y: 56 };
+            if (el.classList.contains("from-left")) { fromVars.x = -64; fromVars.y = 0; }
+            if (el.classList.contains("from-right")) { fromVars.x = 64; fromVars.y = 0; }
+            var delay = 0;
+            if (el.classList.contains("d1")) delay = 0.14;
+            else if (el.classList.contains("d2")) delay = 0.28;
+            else if (el.classList.contains("d3")) delay = 0.42;
+            else if (el.classList.contains("d4")) delay = 0.56;
+            gsap.fromTo(el, fromVars, {
+              opacity: 1, x: 0, y: 0,
+              duration: 1.15, delay: delay, ease: "power3.out",
+              overwrite: "auto", clearProps: "transform",
+              scrollTrigger: { trigger: el, start: "top 90%", once: true },
+              onStart: function () { el.classList.add("in"); }
             });
-          }, { threshold: 0.08, rootMargin: "0px 0px 80px 0px" });
-          revealEls.forEach(function (el) { ro.observe(el); });
-          var sweepQueued = false;
-          function sweepReveals() {
-            sweepQueued = false;
-            var limit = window.innerHeight * 0.94;
-            revealEls.forEach(function (el) {
-              if (!el.classList.contains("in") && el.getBoundingClientRect().top < limit) {
-                el.classList.add("in"); ro.unobserve(el);
-              }
-            });
-          }
-          window.addEventListener("scroll", function () {
-            if (!sweepQueued) { sweepQueued = true; requestAnimationFrame(sweepReveals); }
-          }, { passive: true });
-          window.addEventListener("load", sweepReveals);
-          sweepReveals();
-          setTimeout(sweepReveals, 350);
-          setTimeout(function () {
-            revealEls.forEach(function (el) { el.classList.add("in"); });
-          }, 1600);
+          });
+          window.addEventListener("load", function () { ScrollTrigger.refresh(); });
         } else {
+          /* Fallback (no library / reduced motion): everything just visible. */
           revealEls.forEach(function (el) { el.classList.add("in"); });
         }
 
@@ -1734,9 +1787,10 @@
 
         /* ---------- Hero parallax on scroll ---------- */
         var heroInner = document.querySelector(".hero-inner");
+        function currentScrollY() { return lenis ? lenis.scroll : window.scrollY; }
         function updateHeroParallax() {
           if (!heroInner || reduceMotion) return;
-          var y = window.scrollY;
+          var y = currentScrollY();
           var heroH = heroEl ? heroEl.offsetHeight : window.innerHeight;
           if (y < heroH) {
             var p = y / heroH;
@@ -1756,13 +1810,14 @@
           return document.getElementById(id);
         });
         function onScroll() {
-          nav.classList.toggle("scrolled", window.scrollY > 24);
-          toTop.classList.toggle("show", window.scrollY > 700);
+          var y = currentScrollY();
+          nav.classList.toggle("scrolled", y > 24);
+          toTop.classList.toggle("show", y > 700);
           updateTimeline();
           updateHeroParallax();
           var h = document.documentElement;
           var max = h.scrollHeight - h.clientHeight;
-          if (progressBar) progressBar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
+          if (progressBar) progressBar.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
           var current = null;
           spySections.forEach(function (sec) {
             if (sec && sec.getBoundingClientRect().top <= window.innerHeight * 0.4) current = sec.id;
@@ -1772,9 +1827,12 @@
           });
         }
         window.addEventListener("scroll", onScroll, { passive: true });
+        if (lenis) lenis.on("scroll", onScroll);
+        else if (gsapReady) gsap.ticker.add(function () { ScrollTrigger.update(); });
         onScroll();
         toTop.addEventListener("click", function () {
-          window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+          if (lenis) lenis.scrollTo(0, { duration: 1.35 });
+          else window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
         });
 
         /* ---------- Tangier live clock ---------- */
