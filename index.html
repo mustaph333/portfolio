@@ -65,12 +65,12 @@
         font-size: clamp(38px, 9vw, 96px); line-height: .95; letter-spacing: -.02em; text-align: center;
         overflow: hidden;
       }
-      #preloader .pre-name span { display: inline-block; animation: preUp .9s var(--ease) both; }
+      #preloader .pre-name span { display: inline-block; animation: preUp .65s var(--ease) both; }
       #preloader .pre-name .pre-outline { color: transparent; -webkit-text-stroke: 2px var(--accent); text-shadow: 0 0 40px rgba(74,222,128,.35); }
       #preloader .pre-name span:nth-child(2) { animation-delay: .12s; }
       @keyframes preUp { from { transform: translateY(110%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
       #preloader .pre-bar { width: min(320px, 60vw); height: 2px; background: #16211a; overflow: hidden; border-radius: 99px; }
-      #preloader .pre-bar i { display: block; height: 100%; width: 0; background: var(--accent); box-shadow: 0 0 16px rgba(74,222,128,.8); animation: preFill 1.25s var(--ease) forwards; }
+      #preloader .pre-bar i { display: block; height: 100%; width: 0; background: var(--accent); box-shadow: 0 0 16px rgba(74,222,128,.8); animation: preFill .55s var(--ease) forwards; }
       @keyframes preFill { to { width: 100%; } }
       #preloader .pre-hint { font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); }
       body.pre-lock { overflow: hidden; }
@@ -99,25 +99,6 @@
         60% { transform: translate(-22px, -8px); }
         80% { transform: translate(16px, 18px); }
       }
-
-      /* ---------- Custom cursor (fine pointers only) ---------- */
-      #cursorDot, #cursorRing {
-        position: fixed; top: 0; left: 0; z-index: 200; pointer-events: none;
-        border-radius: 50%; display: none;
-      }
-      #cursorDot { width: 6px; height: 6px; background: var(--accent); box-shadow: 0 0 10px rgba(74, 222, 128, .8); }
-      #cursorRing {
-        width: 38px; height: 38px; border: 1px solid rgba(74, 222, 128, .55);
-        transition: width .25s var(--ease), height .25s var(--ease), border-color .25s, background .25s, border-radius .25s;
-        display: none; align-items: center; justify-content: center;
-        font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--accent-ink);
-      }
-      #cursorRing .cursor-label { opacity: 0; transition: opacity .2s; white-space: nowrap; }
-      #cursorRing.grow { width: 62px; height: 62px; border-color: rgba(74, 222, 128, .9); background: rgba(74, 222, 128, .07); }
-      #cursorRing.view { width: 76px; height: 76px; border-radius: 50%; background: var(--accent); border-color: var(--accent); box-shadow: 0 0 34px rgba(74,222,128,.5); }
-      #cursorRing.view .cursor-label { opacity: 1; }
-      body.has-cursor #cursorRing { display: flex !important; }
-      body.has-cursor #cursorDot, body.has-cursor #cursorRing { display: block; }
 
       /* ---------- Lenis smooth scroll (library-recommended base styles) ---------- */
       html.lenis, html.lenis body { height: auto; }
@@ -699,7 +680,7 @@
       }
       @media print {
         .reveal { opacity: 1 !important; transform: none !important; }
-        .nav, #toTop, .scroll-hint, #webgl, #particles, #dots, .grain, #cursorDot, #cursorRing, #preloader { display: none !important; }
+        .nav, #toTop, .scroll-hint, #webgl, #particles, #dots, .grain, #preloader { display: none !important; }
       }
     </style>
   </head>
@@ -713,8 +694,6 @@
     <a class="skip-link" href="#about">Skip to content</a>
     <div id="progressBar" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
-    <div id="cursorDot" aria-hidden="true"></div>
-    <div id="cursorRing" aria-hidden="true"><span class="cursor-label">VIEW →</span></div>
     <noscript><style>.reveal { opacity: 1 !important; transform: none !important; } .skill-fill { width: auto !important; }</style></noscript>
 
     <!-- ================= NAV ================= -->
@@ -1280,11 +1259,13 @@
               preloader.classList.add("done");
               document.body.classList.remove("pre-lock");
             }
-            setTimeout(dismissPreloader, 1350);
+            setTimeout(dismissPreloader, 600);
+            if (document.readyState === "complete") dismissPreloader();
+            else window.addEventListener("load", dismissPreloader);
             window.addEventListener("wheel", dismissPreloader, { passive: true, once: true });
             window.addEventListener("touchstart", dismissPreloader, { passive: true, once: true });
             preloader.addEventListener("click", dismissPreloader);
-            setTimeout(function () { preloader.style.display = "none"; }, 2400);
+            setTimeout(function () { preloader.style.display = "none"; }, 1500);
           }
         }
 
@@ -1460,34 +1441,61 @@
             "float fbm(vec2 p){",
             "  float v=0.0;float a=0.5;",
             "  mat2 rot=mat2(0.8,0.6,-0.6,0.8);",
-            "  for(int i=0;i<5;i++){v+=a*noise(p);p=rot*p*2.0;a*=0.5;}",
+            "  for(int i=0;i<3;i++){v+=a*noise(p);p=rot*p*2.0;a*=0.5;}",
             "  return v;",
+            "}",
+            /* One defined light ribbon: a bright core (exp falloff on the
+               centreline distance) wrapped in a wider emerald edge glow,
+               with energy pulsing along its length so it reads as a flowing
+               neon streak, not cloudy noise. */
+            "float strand(vec2 q,float base,float arc,float w,float t,float seed){",
+            "  float y=base+sin(q.x*1.15+seed*6.2831+t*0.11)*arc",
+            "               +sin(q.x*2.6-seed*4.0-t*0.07)*arc*0.35;",
+            "  float d=abs(q.y-y);",
+            "  float core=exp(-(d*d)/(w*w));",
+            "  float edge=exp(-(d*d)/(w*w*16.0));",
+            "  float flow=0.78+0.35*sin(q.x*3.4-t*1.15+seed*21.0)",
+            "                +0.18*sin(q.x*7.3-t*2.1+seed*9.0);",
+            "  return (core*1.25+edge*0.55)*flow;",
             "}",
             "void main(){",
             "  vec2 uv=gl_FragCoord.xy/u_res;",
-            "  vec2 p=uv;p.x*=u_res.x/u_res.y;",
-            "  float t=u_time*0.055;",
-            "  vec2 q=vec2(fbm(p*1.4+vec2(t*1.4,t*0.6)),",
-            "              fbm(p*1.4+vec2(5.2,1.3)-vec2(t*0.8,t*0.5)));",
-            "  vec2 r=vec2(fbm(p*1.4+2.2*q+vec2(1.7,9.2)+vec2(t*1.1,t*0.7)),",
-            "              fbm(p*1.4+2.2*q+vec2(8.3,2.8)-vec2(t*0.6,t*0.9)));",
-            "  float f=fbm(p*1.4+2.5*r+u_mouse*0.18);",
-            "  float bands=sin((uv.y*2.4+uv.x*0.9+f*3.4+t*1.6)*3.14159);",
-            "  float ribbon=pow(smoothstep(-0.2,1.0,bands),2.0);",
-            "  float core=pow(smoothstep(0.55,1.0,bands),3.0);",
-            "  float glow=f*ribbon;",
-            "  vec3 deep=vec3(0.012,0.10,0.045);",
-            "  vec3 mid=vec3(0.10,0.72,0.34);",
-            "  vec3 lite=vec3(0.62,0.95,0.45);",
-            "  vec3 col=vec3(0.020,0.031,0.027);",
-            "  col+=deep*f*1.4;",
-            "  col+=mid*glow*0.72;",
-            "  col+=lite*core*f*0.5;",
-            "  col+=mid*pow(glow,3.0)*0.6;",
-            "  float calm=smoothstep(0.35,1.05,uv.x+(1.0-uv.y)*0.25);",
-            "  col*=mix(0.38,1.0,calm);",
-            "  float vig=smoothstep(1.25,0.35,length(uv-vec2(0.62,0.45)));",
-            "  col*=mix(0.72,1.0,vig);",
+            "  float aspect=u_res.x/u_res.y;",
+            "  vec2 p=vec2(uv.x*aspect,uv.y);",
+            "  float t=u_time;",
+            /* Rotate ~-24deg so the strands sweep diagonally across the frame. */
+            "  float ang=-0.42;",
+            "  float ca=cos(ang);float sa=sin(ang);",
+            "  vec2 ctr=vec2(aspect*0.5,0.5);",
+            "  vec2 q=mat2(ca,-sa,sa,ca)*(p-ctr)+ctr;",
+            "  q+=u_mouse*0.035;",
+            /* One cheap fbm pass gives the ribbons a gentle organic waver. */
+            "  float warp=fbm(q*1.7+vec2(t*0.045,t*0.02));",
+            "  q.y+=(warp-0.5)*0.30;",
+            "  vec3 col=vec3(0.010,0.020,0.014);",
+            "  float s=0.0;",
+            "  s+=strand(q,0.16,0.055,0.006,t,0.13)*0.55;",
+            "  s+=strand(q,0.34,0.075,0.009,t,0.37)*0.85;",
+            "  s+=strand(q,0.47,0.085,0.013,t,0.55)*1.00;",
+            "  s+=strand(q,0.56,0.080,0.007,t,0.71)*0.80;",
+            "  s+=strand(q,0.68,0.095,0.016,t,0.23)*0.65;",
+            "  s+=strand(q,0.86,0.070,0.010,t,0.88)*0.60;",
+            /* Layered colour: deep emerald edges, saturated green body,
+               near-white core where strands run hottest or overlap. */
+            "  vec3 deep=vec3(0.00,0.36,0.14);",
+            "  vec3 mid=vec3(0.13,0.85,0.38);",
+            "  vec3 lite=vec3(0.78,1.00,0.82);",
+            "  col+=deep*s*0.55;",
+            "  col+=mid*pow(s,1.6)*0.85;",
+            "  col+=lite*pow(s,3.2)*1.05;",
+            /* Soft ambient emerald wash pooled behind the strand cluster. */
+            "  float wash=fbm(q*1.1-vec2(t*0.03,0.0));",
+            "  col+=vec3(0.02,0.16,0.07)*wash*smoothstep(0.2,0.9,s+0.25)*0.5;",
+            /* Keep the left calmer so the headline stays readable. */
+            "  float calm=smoothstep(0.15,1.15,uv.x*0.75+(1.0-uv.y)*0.35);",
+            "  col*=mix(0.45,1.0,calm);",
+            "  float vig=smoothstep(1.3,0.3,length(uv-vec2(0.6,0.45)));",
+            "  col*=mix(0.7,1.0,vig);",
             "  gl_FragColor=vec4(col,1.0);",
             "}"
           ].join("\n");
@@ -1518,10 +1526,12 @@
           var uTime = gl.getUniformLocation(prog, "u_time");
           var uMouse = gl.getUniformLocation(prog, "u_mouse");
 
-          var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+          /* Cheap by design: pixel ratio capped at 1.0 and a 0.7 render
+             scale — CSS upscales the result and the soft light hides it. */
+          var SCALE = Math.min(window.devicePixelRatio || 1, 1.0) * 0.7;
           function resize() {
-            var w = Math.max(2, Math.floor(heroEl.clientWidth * DPR));
-            var h = Math.max(2, Math.floor(heroEl.clientHeight * DPR));
+            var w = Math.max(2, Math.floor(heroEl.clientWidth * SCALE));
+            var h = Math.max(2, Math.floor(heroEl.clientHeight * SCALE));
             if (webglCanvas.width !== w || webglCanvas.height !== h) {
               webglCanvas.width = w;
               webglCanvas.height = h;
@@ -1543,10 +1553,14 @@
           }
           if (reduceMotion) { render(14.0); return true; }
           var startT = performance.now();
+          var lastFrame = 0;
           (function frame(now) {
             requestAnimationFrame(frame);
             if (!heroVisible || document.hidden) return;
-            render(((now || startT) - startT) / 1000);
+            var n = now || performance.now();
+            if (n - lastFrame < 33) return; /* ~30fps is plenty for flowing light */
+            lastFrame = n;
+            render((n - startT) / 1000);
           })(startT);
           return true;
         }
@@ -1561,7 +1575,7 @@
           if (!dctx) return;
           dotsCanvas.classList.add("on");
 
-          var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+          var DPR = Math.min(window.devicePixelRatio || 1, 1.0);
           var W = 0, H = 0, dots = [];
 
           function makeDot(seed) {
@@ -1580,7 +1594,7 @@
             };
           }
           function seedDots() {
-            var target = Math.round(Math.min(110, Math.max(36, (W * H) / 15000)));
+            var target = Math.round(Math.min(55, Math.max(18, (W * H) / 30000)));
             dots = [];
             for (var i = 0; i < target; i++) dots.push(makeDot(true));
           }
@@ -1643,30 +1657,8 @@
           })(0);
         })();
 
-        /* ---------- Custom cursor + magnetic buttons ---------- */
+        /* ---------- Magnetic buttons ---------- */
         if (finePointer && !reduceMotion) {
-          document.body.classList.add("has-cursor");
-          var dot = document.getElementById("cursorDot");
-          var ring = document.getElementById("cursorRing");
-          var mx = -100, my = -100, rx = -100, ry = -100;
-          document.addEventListener("mousemove", function (e) {
-            mx = e.clientX; my = e.clientY;
-            dot.style.transform = "translate(" + mx + "px," + my + "px) translate(-50%,-50%)";
-          });
-          (function cursorLoop() {
-            rx += (mx - rx) * 0.16;
-            ry += (my - ry) * 0.16;
-            ring.style.transform = "translate(" + rx + "px," + ry + "px) translate(-50%,-50%)";
-            requestAnimationFrame(cursorLoop);
-          })();
-          document.querySelectorAll("a, button, .skill, .project, .service").forEach(function (el) {
-            el.addEventListener("mouseenter", function () { ring.classList.add("grow"); });
-            el.addEventListener("mouseleave", function () { ring.classList.remove("grow"); });
-          });
-          document.querySelectorAll(".project-link, .project h3").forEach(function (el) {
-            el.addEventListener("mouseenter", function () { ring.classList.add("view"); ring.classList.remove("grow"); });
-            el.addEventListener("mouseleave", function () { ring.classList.remove("view"); });
-          });
           document.querySelectorAll(".magnetic").forEach(function (el) {
             el.addEventListener("mousemove", function (e) {
               var r = el.getBoundingClientRect();
