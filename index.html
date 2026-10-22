@@ -198,9 +198,11 @@
         padding: 150px 28px 110px; overflow: hidden;
         background: var(--bg);
       }
-      #webgl, #particles { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+      #webgl, #particles, #dots { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
       #particles { opacity: 0; transition: opacity .8s ease; }
       #particles.on { opacity: 1; }
+      #dots { z-index: 1; opacity: 0; transition: opacity 1.2s ease; }
+      #dots.on { opacity: 1; }
       .hero-vignette {
         position: absolute; inset: 0; pointer-events: none; z-index: 1;
         background:
@@ -695,7 +697,7 @@
       }
       @media print {
         .reveal { opacity: 1 !important; transform: none !important; }
-        .nav, #toTop, .scroll-hint, #webgl, #particles, .grain, #cursorDot, #cursorRing { display: none !important; }
+        .nav, #toTop, .scroll-hint, #webgl, #particles, #dots, .grain, #cursorDot, #cursorRing { display: none !important; }
       }
     </style>
   </head>
@@ -751,6 +753,7 @@
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="hero-bloom" aria-hidden="true"></div>
       <div class="hero-vignette" aria-hidden="true"></div>
+      <canvas id="dots" aria-hidden="true"></canvas>
       <div class="hero-inner">
         <span class="hero-pill"><span class="dot"></span> Available for work · Tangier, Morocco · Open to Europe &amp; Remote</span>
         <h1>
@@ -1495,6 +1498,96 @@
         }
 
         if (!startAurora()) startFallback2D();
+
+        /* ---------- Hero dots: small glowing particles drifting over the aurora ---------- */
+        (function startDots() {
+          var dotsCanvas = document.getElementById("dots");
+          if (!dotsCanvas || !heroEl) return;
+          var dctx = dotsCanvas.getContext("2d");
+          if (!dctx) return;
+          dotsCanvas.classList.add("on");
+
+          var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+          var W = 0, H = 0, dots = [];
+
+          function makeDot(seed) {
+            var greens = ["163,230,53", "74,222,128", "134,239,172", "220,252,231"];
+            return {
+              x: Math.random() * W,
+              y: Math.random() * H,
+              r: 0.7 + Math.random() * 1.7,
+              vx: (Math.random() - 0.5) * 0.14,
+              vy: -(0.03 + Math.random() * 0.12),
+              rgb: greens[Math.floor(Math.random() * greens.length)],
+              baseA: 0.28 + Math.random() * 0.5,
+              tw: 0.4 + Math.random() * 0.9,
+              ph: Math.random() * Math.PI * 2,
+              seed: !!seed
+            };
+          }
+          function seedDots() {
+            var target = Math.round(Math.min(110, Math.max(36, (W * H) / 15000)));
+            dots = [];
+            for (var i = 0; i < target; i++) dots.push(makeDot(true));
+          }
+          function resize() {
+            var w = Math.max(2, Math.floor(heroEl.clientWidth * DPR));
+            var h = Math.max(2, Math.floor(heroEl.clientHeight * DPR));
+            if (dotsCanvas.width !== w || dotsCanvas.height !== h) {
+              dotsCanvas.width = w; dotsCanvas.height = h;
+              W = heroEl.clientWidth; H = heroEl.clientHeight;
+              seedDots();
+              if (reduceMotion) draw(9000);
+            }
+          }
+          function draw(t) {
+            dctx.clearRect(0, 0, dotsCanvas.width, dotsCanvas.height);
+            dctx.save();
+            dctx.scale(DPR, DPR);
+            dctx.globalCompositeOperation = "lighter";
+            for (var i = 0; i < dots.length; i++) {
+              var d = dots[i];
+              var tw = 0.55 + 0.45 * Math.sin(t * 0.001 * d.tw + d.ph);
+              var a = d.baseA * tw;
+              var halo = dctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r * 4.2);
+              halo.addColorStop(0, "rgba(" + d.rgb + "," + (a * 0.5) + ")");
+              halo.addColorStop(1, "rgba(" + d.rgb + ",0)");
+              dctx.fillStyle = halo;
+              dctx.beginPath();
+              dctx.arc(d.x, d.y, d.r * 4.2, 0, Math.PI * 2);
+              dctx.fill();
+              dctx.fillStyle = "rgba(" + d.rgb + "," + a + ")";
+              dctx.beginPath();
+              dctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+              dctx.fill();
+            }
+            dctx.restore();
+          }
+          function step() {
+            for (var i = 0; i < dots.length; i++) {
+              var d = dots[i];
+              d.x += d.vx; d.y += d.vy;
+              if (d.y < -6) { d.y = H + 6; d.x = Math.random() * W; }
+              if (d.x < -6) d.x = W + 6;
+              else if (d.x > W + 6) d.x = -6;
+            }
+          }
+
+          resize();
+          window.addEventListener("resize", resize);
+          if (reduceMotion) { draw(9000); return; }
+
+          var heroVisible = true;
+          if ("IntersectionObserver" in window) {
+            new IntersectionObserver(function (entries) { heroVisible = entries[0].isIntersecting; }).observe(heroEl);
+          }
+          (function frameDots(now) {
+            requestAnimationFrame(frameDots);
+            if (!heroVisible || document.hidden) return;
+            step();
+            draw(now || 0);
+          })(0);
+        })();
 
         /* ---------- Custom cursor + magnetic buttons ---------- */
         if (finePointer && !reduceMotion) {
