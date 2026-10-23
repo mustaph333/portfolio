@@ -196,19 +196,9 @@
           radial-gradient(ellipse 90% 75% at 50% 42%, transparent 52%, rgba(3, 5, 4, 0.72) 100%),
           linear-gradient(180deg, rgba(5, 8, 7, 0.35) 0%, transparent 22%, transparent 78%, var(--bg) 100%);
       }
-      .hero-glow {
-        position: absolute; z-index: 0; pointer-events: none;
-        width: 78vw; height: 78vw; max-width: 1100px; max-height: 1100px;
-        right: -16vw; top: 50%; transform: translateY(-54%);
-        background: radial-gradient(circle, rgba(74, 222, 128, 0.16) 0%, rgba(74, 222, 128, 0.05) 42%, transparent 68%);
-        animation: bloomPulse 6s ease-in-out infinite;
-      }
-      @keyframes bloomPulse { 0%,100% { opacity: .75; transform: translateY(-54%) scale(1); } 50% { opacity: 1; transform: translateY(-54%) scale(1.06); } }
-      .hero-bloom {
-        position: absolute; z-index: 1; pointer-events: none; left: 2%; top: 16%;
-        width: 56vw; height: 34vw; max-width: 760px; filter: blur(10px);
-        background: radial-gradient(ellipse, rgba(74,222,128,.14), transparent 65%);
-      }
+      /* No diffuse glow washes over the canvas: the Relay-style base
+         stays near-black and empty, light lives only in the ribbons. */
+      .hero-glow, .hero-bloom { display: none; }
       .hero-inner { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; width: 100%; will-change: transform, opacity; }
       .hero-pill {
         display: inline-flex; align-items: center; gap: 9px;
@@ -1455,27 +1445,37 @@
             ctx.fillStyle = "#050807";
             ctx.fillRect(0, 0, W, H);
             ctx.globalCompositeOperation = "lighter";
+            /* Thin diagonal light-trails on near-black, matching the
+               WebGL look: bundles of hairline strokes, dark gaps between. */
             var bands = [
-              { y: 0.30, amp: 0.10, sp: 0.00021, rgb: "74,222,128", a: 0.20, w: 0.15 },
-              { y: 0.48, amp: 0.13, sp: -0.00014, rgb: "34,197,94", a: 0.15, w: 0.22 },
-              { y: 0.63, amp: 0.08, sp: 0.00011, rgb: "163,230,53", a: 0.09, w: 0.11 }
+              { y: 0.24, amp: 0.06, sp: 0.00016, a: 0.55 },
+              { y: 0.40, amp: 0.08, sp: -0.00011, a: 0.85 },
+              { y: 0.55, amp: 0.07, sp: 0.00013, a: 1.00 },
+              { y: 0.70, amp: 0.08, sp: -0.00009, a: 0.70 },
+              { y: 0.84, amp: 0.05, sp: 0.00010, a: 0.45 }
             ];
+            var offs = [-0.030, -0.012, 0.004, 0.020];
             for (var bi = 0; bi < bands.length; bi++) {
               var b = bands[bi];
-              ctx.beginPath();
-              for (var x = 0; x <= W; x += 4) {
-                var u = x / W;
-                var y = H * (b.y
-                  + Math.sin(u * 3.1 + t * b.sp * 10 + b.y * 9.0) * b.amp
-                  + Math.sin(u * 6.7 - t * b.sp * 7) * b.amp * 0.4);
-                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+              for (var oi = 0; oi < offs.length; oi++) {
+                var bright = oi === 1 || oi === 2;
+                ctx.beginPath();
+                for (var x = 0; x <= W; x += 3) {
+                  var u = x / W;
+                  var y = H * (b.y + offs[oi] + (u - 0.5) * 0.55
+                    + Math.sin(u * 2.6 + t * b.sp * 10 + b.y * 9.0) * b.amp
+                    + Math.sin(u * 5.9 - t * b.sp * 7) * b.amp * 0.35);
+                  if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.strokeStyle = bright
+                  ? "rgba(190,255,205," + (0.5 * b.a) + ")"
+                  : "rgba(46,204,113," + (0.4 * b.a) + ")";
+                ctx.lineWidth = bright ? 1.1 : 0.8;
+                ctx.lineCap = "round";
+                ctx.shadowColor = "rgba(34,197,94,0.9)";
+                ctx.shadowBlur = bright ? 9 : 6;
+                ctx.stroke();
               }
-              ctx.strokeStyle = "rgba(" + b.rgb + "," + b.a + ")";
-              ctx.lineWidth = H * b.w;
-              ctx.lineCap = "round";
-              ctx.shadowColor = "rgba(" + b.rgb + ",0.8)";
-              ctx.shadowBlur = 42;
-              ctx.stroke();
             }
             ctx.globalCompositeOperation = "source-over";
           }
@@ -1513,71 +1513,77 @@
             "uniform vec2 u_res;",
             "uniform float u_time;",
             "uniform vec2 u_mouse;",
-            "float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}",
-            "float noise(vec2 p){",
-            "  vec2 i=floor(p);vec2 f=fract(p);",
-            "  vec2 u=f*f*(3.0-2.0*f);",
-            "  return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),u.x),",
-            "             mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),u.x),u.y);",
+            /* One thin light-trail streak: a hairline white-hot core (tight
+               gaussian on the centreline distance) inside a narrow emerald
+               glow and a faint wide halo. The centreline waves gently and
+               energy pulses travel slowly along its length, so it reads as
+               a long-exposure neon trail on black — never a soft cloud. */
+            "float streak(vec2 q,float c,float w,float amp,float t,float seed,float wseed){",
+            "  float wave=sin(q.x*1.35+wseed*19.0+t*0.055)*0.052",
+            "            +sin(q.x*3.1-wseed*11.0-t*0.034)*0.020;",
+            "  float d=q.y-(c+wave+sin(q.x*0.9+seed*23.0)*0.012);",
+            "  float d2=d*d;",
+            "  float core=exp(-d2/(w*w));",
+            "  float glow=exp(-d2/(w*w*30.0));",
+            "  float halo=exp(-d2/(w*w*260.0));",
+            "  float flow=0.72+0.28*sin(q.x*2.0-t*0.30+seed*29.0)",
+            "                +0.12*sin(q.x*5.1-t*0.52+seed*13.0);",
+            "  return (core*1.30+glow*0.30+halo*0.045)*amp*flow;",
             "}",
-            "float fbm(vec2 p){",
-            "  float v=0.0;float a=0.5;",
-            "  mat2 rot=mat2(0.8,0.6,-0.6,0.8);",
-            "  for(int i=0;i<3;i++){v+=a*noise(p);p=rot*p*2.0;a*=0.5;}",
-            "  return v;",
-            "}",
-            /* One defined light ribbon: a bright core (exp falloff on the
-               centreline distance) wrapped in a wider emerald edge glow,
-               with energy pulsing along its length so it reads as a flowing
-               neon streak, not cloudy noise. */
-            "float strand(vec2 q,float base,float arc,float w,float t,float seed){",
-            "  float y=base+sin(q.x*1.15+seed*6.2831+t*0.11)*arc",
-            "               +sin(q.x*2.6-seed*4.0-t*0.07)*arc*0.35;",
-            "  float d=abs(q.y-y);",
-            "  float core=exp(-(d*d)/(w*w));",
-            "  float edge=exp(-(d*d)/(w*w*16.0));",
-            "  float flow=0.78+0.35*sin(q.x*3.4-t*1.15+seed*21.0)",
-            "                +0.18*sin(q.x*7.3-t*2.1+seed*9.0);",
-            "  return (core*1.25+edge*0.55)*flow;",
+            /* A ribbon band: a tight bundle of parallel streaks sharing one
+               wave, so the lines stay together like silk threads. Dark
+               space between bands is the point — bands never merge. */
+            "float band(vec2 q,float c,float t,float seed,float amp){",
+            "  float s=0.0;",
+            "  s+=streak(q,c+0.046,0.0026,0.62,t,seed+0.11,seed);",
+            "  s+=streak(q,c+0.020,0.0019,1.00,t,seed+0.23,seed);",
+            "  s+=streak(q,c-0.002,0.0032,0.88,t,seed+0.41,seed);",
+            "  s+=streak(q,c-0.024,0.0017,0.72,t,seed+0.67,seed);",
+            "  s+=streak(q,c-0.044,0.0024,0.50,t,seed+0.83,seed);",
+            "  return s*amp;",
             "}",
             "void main(){",
             "  vec2 uv=gl_FragCoord.xy/u_res;",
             "  float aspect=u_res.x/u_res.y;",
             "  vec2 p=vec2(uv.x*aspect,uv.y);",
             "  float t=u_time;",
-            /* Rotate ~-24deg so the strands sweep diagonally across the frame. */
-            "  float ang=-0.42;",
+            /* Rotate ~-29deg: the trails sweep from the upper-right down
+               toward the lower-left, as in the reference. */
+            "  float ang=-0.50;",
             "  float ca=cos(ang);float sa=sin(ang);",
             "  vec2 ctr=vec2(aspect*0.5,0.5);",
             "  vec2 q=mat2(ca,-sa,sa,ca)*(p-ctr)+ctr;",
-            "  q+=u_mouse*0.035;",
-            /* One cheap fbm pass gives the ribbons a gentle organic waver. */
-            "  float warp=fbm(q*1.7+vec2(t*0.045,t*0.02));",
-            "  q.y+=(warp-0.5)*0.30;",
-            "  vec3 col=vec3(0.010,0.020,0.014);",
+            "  q+=u_mouse*0.02;",
+            /* Bands pinch toward the middle as they cross the centre of
+               the frame, so the light pools there, then fans out again. */
+            "  float pinch=1.0-0.15*exp(-pow((q.x-aspect*0.58)*0.70,2.0));",
+            "  q.y=q.y*pinch+0.5*(1.0-pinch);",
+            /* Whole field breathes very slowly along the flow. */
+            "  q.y+=sin(t*0.045)*0.018;",
+            "  vec3 col=vec3(0.006,0.011,0.008);",
             "  float s=0.0;",
-            "  s+=strand(q,0.16,0.055,0.006,t,0.13)*0.55;",
-            "  s+=strand(q,0.34,0.075,0.009,t,0.37)*0.85;",
-            "  s+=strand(q,0.47,0.085,0.013,t,0.55)*1.00;",
-            "  s+=strand(q,0.56,0.080,0.007,t,0.71)*0.80;",
-            "  s+=strand(q,0.68,0.095,0.016,t,0.23)*0.65;",
-            "  s+=strand(q,0.86,0.070,0.010,t,0.88)*0.60;",
-            /* Layered colour: deep emerald edges, saturated green body,
-               near-white core where strands run hottest or overlap. */
-            "  vec3 deep=vec3(0.00,0.36,0.14);",
-            "  vec3 mid=vec3(0.13,0.85,0.38);",
-            "  vec3 lite=vec3(0.78,1.00,0.82);",
-            "  col+=deep*s*0.55;",
-            "  col+=mid*pow(s,1.6)*0.85;",
-            "  col+=lite*pow(s,3.2)*1.05;",
-            /* Soft ambient emerald wash pooled behind the strand cluster. */
-            "  float wash=fbm(q*1.1-vec2(t*0.03,0.0));",
-            "  col+=vec3(0.02,0.16,0.07)*wash*smoothstep(0.2,0.9,s+0.25)*0.5;",
+            "  s+=band(q, 1.04, t, 0.13, 0.55);",
+            "  s+=band(q, 0.70, t, 0.37, 0.90);",
+            "  s+=band(q, 0.38, t, 0.55, 1.10);",
+            "  s+=band(q, 0.07, t, 0.71, 0.85);",
+            "  s+=band(q,-0.22, t, 0.88, 0.58);",
+            /* Faint pooled emerald glow where the bands converge,
+               centre-right — a hint of light, never a cloud. */
+            "  float pool=exp(-pow(length((p-vec2(aspect*0.64,0.50))*vec2(1.0,1.55)),2.0)*3.6);",
+            "  col+=vec3(0.006,0.055,0.022)*pool*(0.75+0.25*sin(t*0.22));",
+            /* Layered colour: deep emerald at the faint edges, saturated
+               green in the glow, near-white only on the hot cores. */
+            "  vec3 deep=vec3(0.00,0.34,0.13);",
+            "  vec3 mid=vec3(0.12,0.88,0.38);",
+            "  vec3 lite=vec3(0.82,1.00,0.86);",
+            "  col+=deep*s*0.42;",
+            "  col+=mid*pow(s,1.7)*0.80;",
+            "  col+=lite*pow(s,3.4)*1.15;",
             /* Keep the left calmer so the headline stays readable. */
             "  float calm=smoothstep(0.15,1.15,uv.x*0.75+(1.0-uv.y)*0.35);",
-            "  col*=mix(0.45,1.0,calm);",
+            "  col*=mix(0.5,1.0,calm);",
             "  float vig=smoothstep(1.3,0.3,length(uv-vec2(0.6,0.45)));",
-            "  col*=mix(0.7,1.0,vig);",
+            "  col*=mix(0.75,1.0,vig);",
             "  gl_FragColor=vec4(col,1.0);",
             "}"
           ].join("\n");
