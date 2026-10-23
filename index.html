@@ -557,6 +557,62 @@
       .forge-steps span { background: #060a08; border: 1px solid var(--line); padding: 7px 12px; border-radius: 999px; color: var(--ink-soft); }
       .forge-steps i { color: var(--accent); font-style: normal; }
 
+      /* ---------- PyREA live terminal ---------- */
+      .pyrea-files { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+      .pyrea-file {
+        font-family: var(--font-mono); font-size: 13.5px; font-weight: 700;
+        color: var(--ink-soft); background: var(--surface-2);
+        border: 1px solid var(--line); border-radius: 999px;
+        padding: 10px 18px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 9px;
+        transition: color .25s, border-color .25s, background .25s, box-shadow .25s;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .pyrea-file:hover { color: var(--ink); border-color: rgba(74, 222, 128, 0.5); }
+      .pyrea-file.is-active {
+        color: var(--accent-ink); background: var(--accent); border-color: var(--accent);
+        box-shadow: 0 0 22px rgba(74, 222, 128, 0.35);
+      }
+      .pyrea-file-note { font-size: 10.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
+      .pyrea-term {
+        background: #060a08; border: 1px solid rgba(74, 222, 128, 0.35); border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, .55), 0 0 60px rgba(74, 222, 128, 0.12);
+        font-family: var(--font-mono);
+      }
+      .pyrea-body {
+        padding: 22px 22px 26px; font-size: 13.5px; line-height: 1.85;
+        height: 440px; overflow-y: auto; overflow-x: hidden;
+        scrollbar-color: #24352b #060a08;
+      }
+      .pyrea-body .pl { white-space: pre-wrap; overflow-wrap: anywhere; }
+      .pyrea-body .pl-cmd { color: var(--ink); font-weight: 700; }
+      .pyrea-body .pl-cmd .dollar { color: var(--accent); }
+      .pyrea-body .pl-summary { color: var(--ink); margin-bottom: 4px; }
+      .pyrea-body .pl-head { margin-top: 18px; font-weight: 700; letter-spacing: .02em; }
+      .pyrea-body .pl-head .h-rest { color: var(--ink-dim); font-weight: 500; }
+      .pyrea-body .h-obs { color: var(--accent); }
+      .pyrea-body .h-der { color: #a7f3d0; }
+      .pyrea-body .h-inf { color: var(--amber); }
+      .pyrea-body .h-unk { color: #8fa398; }
+      .pyrea-body .pl-find { color: var(--ink-soft); }
+      .pyrea-body .pl-find .ev { color: var(--ink-dim); }
+      .pyrea-caret {
+        display: inline-block; width: 8px; height: 1em; background: var(--accent);
+        box-shadow: 0 0 8px rgba(74, 222, 128, .7); vertical-align: -0.12em; margin-left: 3px;
+        animation: blink 0.9s steps(1) infinite;
+      }
+      .pyrea-caption {
+        margin-top: 22px; color: var(--ink-dim); font-size: 14.5px;
+        display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: baseline;
+      }
+      .pyrea-caption a { color: var(--accent); font-weight: 700; text-decoration: none; white-space: nowrap; }
+      .pyrea-caption a:hover { text-decoration: underline; }
+      @media (max-width: 720px) {
+        .pyrea-body { height: 470px; font-size: 12.5px; padding: 18px 16px 22px; }
+        .pyrea-file { flex: 1 1 auto; justify-content: center; }
+      }
+
       /* ---------- Journey ---------- */
       #journey { background: var(--bg-2); border-block: 1px solid var(--line-soft); overflow: hidden; }
       .timeline { position: relative; max-width: 840px; margin: 0 auto; padding: 10px 0; }
@@ -1137,6 +1193,32 @@
             </a>
           </article>
         </div>
+      </div>
+    </section>
+
+    <!-- ================= PYREA LIVE ================= -->
+    <section id="pyrea-live">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <span class="sec-tag">PyREA — Live</span>
+          <h2>Don't take my word for it. <span class="ow">Run it.</span></h2>
+          <p>PyREA is my evidence-first file analyzer: every claim it prints is labelled by how sure it is — seen, computed, guessed, or unknown. Pick a sample file and watch a real analysis run.</p>
+        </div>
+        <div class="pyrea-files reveal" role="group" aria-label="Choose a sample file to analyze">
+          <button type="button" class="pyrea-file is-active" data-sample="pricing" aria-pressed="true">pricing.py</button>
+          <button type="button" class="pyrea-file" data-sample="runner" aria-pressed="false">runner.js</button>
+          <button type="button" class="pyrea-file" data-sample="pyc" aria-pressed="false">cli.pyc <span class="pyrea-file-note">binary</span></button>
+        </div>
+        <div class="pyrea-term reveal d1" id="pyreaTerm">
+          <div class="terminal-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>mustapha@dev: ~/pyrea</span></div>
+          <div class="pyrea-body" id="pyreaBody" data-lenis-prevent role="log" aria-label="PyREA analysis output"></div>
+        </div>
+        <p class="pyrea-caption reveal d2">
+          <span>Real output from the actual PyREA tool, captured on its sample files.</span>
+          <a href="https://github.com/mustaph333/pyrea" target="_blank" rel="noopener">PyREA on GitHub
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M7 17 17 7M8 7h9v9"/></svg>
+          </a>
+        </p>
       </div>
     </section>
 
@@ -1826,6 +1908,193 @@
           if (lenis) lenis.scrollTo(0, { duration: 1.35 });
           else window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
         });
+
+        /* ---------- PyREA live terminal ----------
+           Replays real captured PyREA output. Vanilla JS only: the command
+           types out, the report prints line by line, and pricing.py runs
+           itself the first time the terminal scrolls into view. */
+        var pyreaTerm = document.getElementById("pyreaTerm");
+        var pyreaBody = document.getElementById("pyreaBody");
+        if (pyreaTerm && pyreaBody) {
+          var PYREA_SAMPLES = {
+            pricing: {
+              cmd: "python -m pyrea analyze samples/pricing.py",
+              lines: [
+                { k: "summary", t: "samples/pricing.py (python-source): 5 observations, 2 derivations, 2 inferences, 1 unknowns" },
+                { k: "head", c: "h-obs", label: "OBSERVATIONS", rest: " — seen directly in the target (5)" },
+                { k: "f", t: "- File size: 381 bytes — evidence: sha256:215df768ae9e352d" },
+                { k: "f", t: "- Constant TAX_RATE = 20 — evidence: line 7" },
+                { k: "f", t: "- Function `price_after_discount(price, percent)` — evidence: line 12" },
+                { k: "f", t: "- Function `total_with_tax(amount)` — evidence: line 16" },
+                { k: "f", t: "- URL string: https://api.example-shop.com/v1/prices — evidence: string literal" },
+                { k: "head", c: "h-der", label: "DERIVATIONS", rest: " — computed from the observations (2)" },
+                { k: "f", t: "- `price_after_discount` computes: price - price * percent / 100 — evidence: line 13" },
+                { k: "f", t: "- `total_with_tax` computes: amount + amount * TAX_RATE / 100 — evidence: line 17" },
+                { k: "head", c: "h-inf", label: "INFERENCES", rest: " — likely, but not proven (2)" },
+                { k: "f", t: "- `price_after_discount` likely computes a money/total value (from its name) — evidence: line 12 [confidence: low]" },
+                { k: "f", t: "- `total_with_tax` likely computes a money/total value (from its name) — evidence: line 16 [confidence: low]" },
+                { k: "head", c: "h-unk", label: "UNKNOWNS", rest: " — what this analysis could not determine (1)" },
+                { k: "f", t: "- Runtime behaviour was not executed — analysis is static only" }
+              ]
+            },
+            runner: {
+              cmd: "python -m pyrea analyze samples/runner.js",
+              lines: [
+                { k: "summary", t: "samples/runner.js (javascript-source): 6 observations, 1 derivations, 1 inferences, 1 unknowns" },
+                { k: "head", c: "h-obs", label: "OBSERVATIONS", rest: " — seen directly in the target (6)" },
+                { k: "f", t: "- File size: 368 bytes — evidence: sha256:b2fc0b4b3f64ef32" },
+                { k: "f", t: "- Value START_SPEED = 6 — evidence: line 4" },
+                { k: "f", t: "- Value MAX_SPEED = 13 — evidence: line 5" },
+                { k: "f", t: "- Value currentSpeed = 6 — evidence: line 6" },
+                { k: "f", t: "- Function `updateSpeed(frames)` — evidence: line 8" },
+                { k: "f", t: "- Function `resetSpeed()` — evidence: line 15" },
+                { k: "head", c: "h-der", label: "DERIVATIONS", rest: " — computed from the observations (1)" },
+                { k: "f", t: "- Computes: return START_SPEED + frames * 0.001 — evidence: line 10" },
+                { k: "head", c: "h-inf", label: "INFERENCES", rest: " — likely, but not proven (1)" },
+                { k: "f", t: "- Contains speed-related logic (from function names) — evidence: function names [confidence: low]" },
+                { k: "head", c: "h-unk", label: "UNKNOWNS", rest: " — what this analysis could not determine (1)" },
+                { k: "f", t: "- Pattern-based analysis: control flow and runtime behaviour not proven" }
+              ]
+            },
+            pyc: {
+              cmd: "python -m pyrea analyze cli.cpython-312.pyc",
+              lines: [
+                { k: "summary", t: "cli.cpython-312.pyc (binary): 3 observations, 0 derivations, 0 inferences, 2 unknowns" },
+                { k: "head", c: "h-obs", label: "OBSERVATIONS", rest: " — seen directly in the target (3)" },
+                { k: "f", t: "- File size: 3543 bytes — evidence: sha256:8788cce3b62076d8" },
+                { k: "f", t: "- Byte entropy: 5.26 / 8.0 — evidence: whole file" },
+                { k: "f", t: "- Readable strings found: 61 — evidence: whole file" },
+                { k: "head", c: "h-der", label: "DERIVATIONS", rest: " — computed from the observations (0)" },
+                { k: "f", t: "- (none)" },
+                { k: "head", c: "h-inf", label: "INFERENCES", rest: " — likely, but not proven (0)" },
+                { k: "f", t: "- (none)" },
+                { k: "head", c: "h-unk", label: "UNKNOWNS", rest: " — what this analysis could not determine (2)" },
+                { k: "f", t: "- File type not recognised from magic bytes" },
+                { k: "f", t: "- Compiled code was not disassembled in v1 — behaviour inside functions is not proven (planned: Ghidra/radare2 bridge)" }
+              ]
+            }
+          };
+          var pyreaBtns = document.querySelectorAll("[data-sample]");
+          var pyreaCaret = document.createElement("span");
+          pyreaCaret.className = "pyrea-caret";
+          pyreaCaret.setAttribute("aria-hidden", "true");
+          var pyreaRunId = 0;
+          var pyreaTimers = [];
+          var pyreaStarted = false;
+
+          function pyreaLater(fn, ms) { pyreaTimers.push(setTimeout(fn, ms)); }
+          function pyreaClearTimers() {
+            for (var i = 0; i < pyreaTimers.length; i++) clearTimeout(pyreaTimers[i]);
+            pyreaTimers = [];
+          }
+          function pyreaScroll() { pyreaBody.scrollTop = pyreaBody.scrollHeight; }
+          function pyreaLine(line) {
+            var div = document.createElement("div");
+            if (line.k === "summary") {
+              div.className = "pl pl-summary";
+              div.textContent = line.t;
+            } else if (line.k === "head") {
+              div.className = "pl pl-head " + line.c;
+              var lab = document.createElement("span");
+              lab.textContent = line.label;
+              var rest = document.createElement("span");
+              rest.className = "h-rest";
+              rest.textContent = line.rest;
+              div.appendChild(lab);
+              div.appendChild(rest);
+            } else {
+              div.className = "pl pl-find";
+              var marker = " — evidence: ";
+              var idx = line.t.indexOf(marker);
+              if (idx >= 0) {
+                div.appendChild(document.createTextNode(line.t.slice(0, idx)));
+                var ev = document.createElement("span");
+                ev.className = "ev";
+                ev.textContent = line.t.slice(idx);
+                div.appendChild(ev);
+              } else {
+                div.textContent = line.t;
+              }
+            }
+            return div;
+          }
+          function pyreaCmdLine() {
+            var div = document.createElement("div");
+            div.className = "pl pl-cmd";
+            var dollar = document.createElement("span");
+            dollar.className = "dollar";
+            dollar.textContent = "$ ";
+            var text = document.createElement("span");
+            div.appendChild(dollar);
+            div.appendChild(text);
+            return { div: div, text: text };
+          }
+          function runPyrea(key) {
+            var sample = PYREA_SAMPLES[key];
+            if (!sample) return;
+            pyreaStarted = true;
+            pyreaRunId++;
+            var run = pyreaRunId;
+            pyreaClearTimers();
+            pyreaBtns.forEach(function (b) {
+              var active = b.getAttribute("data-sample") === key;
+              b.classList.toggle("is-active", active);
+              b.setAttribute("aria-pressed", active ? "true" : "false");
+            });
+            pyreaBody.innerHTML = "";
+            var cmd = pyreaCmdLine();
+            pyreaBody.appendChild(cmd.div);
+
+            if (reduceMotion) {
+              cmd.text.textContent = sample.cmd;
+              sample.lines.forEach(function (l) { pyreaBody.appendChild(pyreaLine(l)); });
+              pyreaBody.appendChild(pyreaCaret);
+              pyreaScroll();
+              return;
+            }
+
+            cmd.div.appendChild(pyreaCaret);
+            pyreaScroll();
+            var ci = 0;
+            (function typeCmd() {
+              if (run !== pyreaRunId) return;
+              ci++;
+              cmd.text.textContent = sample.cmd.slice(0, ci);
+              pyreaScroll();
+              if (ci < sample.cmd.length) pyreaLater(typeCmd, 20);
+              else pyreaLater(printNext, 340);
+            })();
+            var li = 0;
+            function printNext() {
+              if (run !== pyreaRunId) return;
+              if (li >= sample.lines.length) {
+                pyreaBody.appendChild(pyreaCaret);
+                pyreaScroll();
+                return;
+              }
+              var line = sample.lines[li];
+              li++;
+              pyreaBody.appendChild(pyreaLine(line));
+              pyreaBody.appendChild(pyreaCaret);
+              pyreaScroll();
+              pyreaLater(printNext, line.k === "head" ? 210 : 105);
+            }
+          }
+          pyreaBtns.forEach(function (b) {
+            b.addEventListener("click", function () { runPyrea(b.getAttribute("data-sample")); });
+          });
+          if ("IntersectionObserver" in window) {
+            var pyreaIO = new IntersectionObserver(function (entries) {
+              if (entries[0].isIntersecting) {
+                if (!pyreaStarted) runPyrea("pricing");
+                pyreaIO.disconnect();
+              }
+            }, { threshold: 0.3 });
+            pyreaIO.observe(pyreaTerm);
+          } else {
+            runPyrea("pricing");
+          }
+        }
 
         /* ---------- Tangier live clock ---------- */
         var timeEl = document.getElementById("tangierTime");
