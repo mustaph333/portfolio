@@ -1462,7 +1462,7 @@
                   if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.strokeStyle = bright
-                  ? "rgba(190,255,205," + (0.5 * b.a) + ")"
+                  ? "rgba(105,235,150," + (0.45 * b.a) + ")"
                   : "rgba(46,204,113," + (0.4 * b.a) + ")";
                 ctx.lineWidth = bright ? 1.1 : 0.8;
                 ctx.lineCap = "round";
@@ -1506,7 +1506,7 @@
             "precision highp float;",
             "uniform vec2 u_res;",
             "uniform float u_time;",
-            /* One thin light-trail streak: a hairline white-hot core (tight
+            /* One thin light-trail streak: a hairline green core (tight
                gaussian on the centreline distance) inside a narrow emerald
                glow and a faint wide halo. The centreline waves gently and
                energy pulses travel slowly along its length, so it reads as
@@ -1521,7 +1521,7 @@
             "  float halo=exp(-d2/(w*w*260.0));",
             "  float flow=0.72+0.28*sin(q.x*2.0-t*0.30+seed*29.0)",
             "                +0.12*sin(q.x*5.1-t*0.52+seed*13.0);",
-            "  return (core*1.30+glow*0.30+halo*0.045)*amp*flow;",
+            "  return (core*0.95+glow*0.30+halo*0.045)*amp*flow;",
             "}",
             /* A ribbon band: a tight bundle of parallel streaks sharing one
                wave, so the lines stay together like silk threads. Dark
@@ -1564,13 +1564,14 @@
             "  float pool=exp(-pow(length((p-vec2(aspect*0.64,0.50))*vec2(1.0,1.55)),2.0)*3.6);",
             "  col+=vec3(0.006,0.055,0.022)*pool*(0.75+0.25*sin(t*0.22));",
             /* Layered colour: deep emerald at the faint edges, saturated
-               green in the glow, near-white only on the hot cores. */
+               green in the glow, and a soft mint-green — never white — on
+               the cores, so the trails read green end to end. */
             "  vec3 deep=vec3(0.00,0.34,0.13);",
-            "  vec3 mid=vec3(0.12,0.88,0.38);",
-            "  vec3 lite=vec3(0.82,1.00,0.86);",
+            "  vec3 mid=vec3(0.10,0.88,0.32);",
+            "  vec3 lite=vec3(0.28,1.00,0.46);",
             "  col+=deep*s*0.42;",
-            "  col+=mid*pow(s,1.7)*0.80;",
-            "  col+=lite*pow(s,3.4)*1.15;",
+            "  col+=mid*pow(s,1.7)*0.55;",
+            "  col+=lite*pow(s,3.4)*0.18;",
             /* Keep the left calmer so the headline stays readable. */
             "  float calm=smoothstep(0.15,1.15,uv.x*0.75+(1.0-uv.y)*0.35);",
             "  col*=mix(0.5,1.0,calm);",
