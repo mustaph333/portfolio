@@ -1418,15 +1418,9 @@
         var heroEl = document.querySelector(".hero");
         var webglCanvas = document.getElementById("webgl");
         var fallbackCanvas = document.getElementById("particles");
-        var heroMouse = { x: 0, y: 0 };
-        if (heroEl) {
-          heroEl.addEventListener("mousemove", function (e) {
-            var r = heroEl.getBoundingClientRect();
-            heroMouse.x = ((e.clientX - r.left) / r.width - 0.5) * 2;
-            heroMouse.y = ((e.clientY - r.top) / r.height - 0.5) * 2;
-          });
-          heroEl.addEventListener("mouseleave", function () { heroMouse.x = 0; heroMouse.y = 0; });
-        }
+        /* The background takes NO mouse input by design: the light trails
+           drift on their own slow clock only, so moving the cursor never
+           shifts, bends or brightens them. */
 
         function startFallback2D() {
           if (webglCanvas) webglCanvas.style.display = "none";
@@ -1502,7 +1496,7 @@
           if (!webglCanvas || !heroEl) return false;
           var gl = null;
           try {
-            gl = webglCanvas.getContext("webgl", { alpha: false, antialias: false, powerPreference: "low-power" }) ||
+            gl = webglCanvas.getContext("webgl", { alpha: false, antialias: false, powerPreference: "default" }) ||
                  webglCanvas.getContext("experimental-webgl");
           } catch (e) { return false; }
           if (!gl) return false;
@@ -1512,7 +1506,6 @@
             "precision highp float;",
             "uniform vec2 u_res;",
             "uniform float u_time;",
-            "uniform vec2 u_mouse;",
             /* One thin light-trail streak: a hairline white-hot core (tight
                gaussian on the centreline distance) inside a narrow emerald
                glow and a faint wide halo. The centreline waves gently and
@@ -1553,7 +1546,6 @@
             "  float ca=cos(ang);float sa=sin(ang);",
             "  vec2 ctr=vec2(aspect*0.5,0.5);",
             "  vec2 q=mat2(ca,-sa,sa,ca)*(p-ctr)+ctr;",
-            "  q+=u_mouse*0.02;",
             /* Bands pinch toward the middle as they cross the centre of
                the frame, so the light pools there, then fans out again. */
             "  float pinch=1.0-0.15*exp(-pow((q.x-aspect*0.58)*0.70,2.0));",
@@ -1612,11 +1604,11 @@
           gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
           var uRes = gl.getUniformLocation(prog, "u_res");
           var uTime = gl.getUniformLocation(prog, "u_time");
-          var uMouse = gl.getUniformLocation(prog, "u_mouse");
 
-          /* Cheap by design: pixel ratio capped at 1.0 and a 0.7 render
-             scale — CSS upscales the result and the soft light hides it. */
-          var SCALE = Math.min(window.devicePixelRatio || 1, 1.0) * 0.7;
+          /* Cheap by design: pixel ratio capped at 1.0 and a 0.5 render
+             scale — a quarter of the screen's pixels, and CSS upscaling
+             hides it completely in soft light trails. */
+          var SCALE = Math.min(window.devicePixelRatio || 1, 1.0) * 0.5;
           function resize() {
             var w = Math.max(2, Math.floor(heroEl.clientWidth * SCALE));
             var h = Math.max(2, Math.floor(heroEl.clientHeight * SCALE));
@@ -1636,7 +1628,6 @@
           function render(t) {
             gl.uniform2f(uRes, webglCanvas.width, webglCanvas.height);
             gl.uniform1f(uTime, t);
-            gl.uniform2f(uMouse, heroMouse.x, heroMouse.y);
             gl.drawArrays(gl.TRIANGLES, 0, 3);
           }
           if (reduceMotion) { render(14.0); return true; }
@@ -1646,7 +1637,7 @@
             requestAnimationFrame(frame);
             if (!heroVisible || document.hidden) return;
             var n = now || performance.now();
-            if (n - lastFrame < 33) return; /* ~30fps is plenty for flowing light */
+            if (n - lastFrame < 50) return; /* ~20fps: the trails drift slowly, nobody can tell — and the GPU rests between frames */
             lastFrame = n;
             render((n - startT) / 1000);
           })(startT);
@@ -1682,7 +1673,7 @@
             };
           }
           function seedDots() {
-            var target = Math.round(Math.min(55, Math.max(18, (W * H) / 30000)));
+            var target = Math.round(Math.min(40, Math.max(14, (W * H) / 42000)));
             dots = [];
             for (var i = 0; i < target; i++) dots.push(makeDot(true));
           }
@@ -1737,11 +1728,15 @@
           if ("IntersectionObserver" in window) {
             new IntersectionObserver(function (entries) { heroVisible = entries[0].isIntersecting; }).observe(heroEl);
           }
+          var lastDotFrame = 0;
           (function frameDots(now) {
             requestAnimationFrame(frameDots);
             if (!heroVisible || document.hidden) return;
+            var n = now || performance.now();
+            if (n - lastDotFrame < 33) return; /* ~30fps cap, matching the aurora's cheap-render rule */
+            lastDotFrame = n;
             step();
-            draw(now || 0);
+            draw(n);
           })(0);
         })();
 
