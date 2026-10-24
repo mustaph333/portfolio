@@ -1992,9 +1992,11 @@
           if (y < heroH) {
             var p = y / heroH;
             heroInner.style.transform = "translateY(" + (y * 0.22) + "px) scale(" + (1 - p * 0.06) + ")";
-            heroInner.style.opacity = String(1 - p * 0.55);
+            /* No opacity fade: it washed the hero text out to grey
+               while the hero was still on screen (user report). */
+            heroInner.style.opacity = "1";
           } else {
-            heroInner.style.opacity = "0.45";
+            heroInner.style.opacity = "1";
           }
         }
 
